@@ -1,0 +1,178 @@
+<html>
+
+<head>
+	<script>
+		//COPYRIGHT 2018
+		//Created By:   Christopher Bowers
+		//Last Edited:  May 2018
+	</script>
+
+	<title>
+		Maze
+	</title>
+
+	<style>
+		html, body {
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			border: 0;
+		}
+
+		canvas {
+			position: absolute;
+			border: 1px solid #000000;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+			padding: 0;
+			left: 50%;
+			top: 50%;
+            outline: 0;
+            transform: translate(-50%, -50%);
+		}
+	</style>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+</head>
+
+<body>
+	<canvas id="canvas1" tabindex="1">
+		Your browser is not supported.
+	</canvas>
+</body>
+
+<script>
+    var TILE_SIZE = 32; //tile size in pixels
+    var WINDOW_BORDER = 10; //number of pixels on each border
+    var CAMERA_SIZE = 10; //number of tiles visible at a time (squared)
+    var MAP_SIZE = 100; //number of total tiles (squared)
+    var KEYS = {}; //keys currently pressed
+    var MOUSE = {};
+    var TOUCHES = [];
+
+    var CANVAS = document.getElementById("canvas1");
+	var CTX = CANVAS.getContext("2d");
+
+    function resizeCanvas() {
+        var width = window.innerWidth - WINDOW_BORDER * 2;
+        var height = window.innerHeight- WINDOW_BORDER * 2;
+        var smallest = Math.min(width, height);
+        CANVAS.style.width = smallest;
+        CANVAS.style.height = smallest;
+        CANVAS.width = CAMERA_SIZE * TILE_SIZE;
+        CANVAS.height = CAMERA_SIZE * TILE_SIZE;
+
+        // console.log("Canvas Width: " + CANVAS.width + ", Canvas Height: " + CANVAS.height);
+        // console.log("Canvas Style Width: " + CANVAS.style.width + ", Canvas Style Height: " + CANVAS.style.height);
+    }
+
+    function clearCanvas() {
+    	CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+    }
+
+    function setCoordinates(e, touch) {
+        var object = {};
+        if(touch) object.id = e.identifier;
+        object.x = e.pageX - CANVAS.getBoundingClientRect().left;
+        object.y = e.pageY - CANVAS.getBoundingClientRect().top;
+        return object;
+    }
+
+    function getTouchIdentifier(id) {
+        for(var i = 0; i < TOUCHES.length; i++) {
+            if(TOUCHES[i].id == id) return i;
+        }
+        return -1;
+    }
+
+    function keyDown(e) {
+        e.preventDefault();
+		KEYS[e.key] = e.keyCode;
+        // console.log(KEYS);
+    }
+
+    function keyUp(e) {
+        e.preventDefault();
+        delete KEYS[e.key];
+        // console.log(KEYS);
+    }
+
+    function touchStart(e) {
+        e.preventDefault();
+        for(var i = 0; i < e.changedTouches.length; i++) {
+            TOUCHES.push(setCoordinates(e.changedTouches[i], true));
+        }
+        // console.log(TOUCHES[0]);
+    }
+
+    function touchMove(e) {
+        e.preventDefault();
+        for(var i = 0; i < e.changedTouches.length; i++) {
+            var id = getTouchIdentifier(e.changedTouches[i].identifier);
+            var coordinates = setCoordinates(e.changedTouches[i]);
+            TOUCHES[id].moveX = coordinates.x;
+            TOUCHES[id].moveY = coordinates.y;
+        }
+        // console.log(TOUCHES[0]);
+    }
+
+    function touchEnd(e) {
+        e.preventDefault();
+        for(var i = 0; i < e.changedTouches.length; i++) {
+            var id = getTouchIdentifier(e.changedTouches[i].identifier);
+            TOUCHES.splice(id, 1);
+        }
+        // console.log(TOUCHES[0]);
+    }
+
+    function touchCancel(e) {
+        e.preventDefault();
+        for(var i = 0; i < e.changedTouches.length; i++) {
+            var id = getTouchIdentifier(e.changedTouches[i].identifier);
+            TOUCHES.splice(id, 1);
+        }
+        // console.log(TOUCHES);
+    }
+
+    function mouseMove(e) {
+        if(!MOUSE.pressed) MOUSE.pressed = false;
+        var coordinates = setCoordinates(e);
+        MOUSE.x = coordinates.x;
+        MOUSE.y = coordinates.y;
+        // console.log(MOUSE);
+    }
+
+    function mouseDown(e) {
+        MOUSE.pressed = true;
+        var coordinates = setCoordinates(e);
+        MOUSE.x = coordinates.x;
+        MOUSE.y = coordinates.y;
+        // console.log(MOUSE);
+    }
+
+    function mouseUp(e) {
+        MOUSE.pressed = false;
+        var coordinates = setCoordinates(e);
+        MOUSE.x = coordinates.x;
+        MOUSE.y = coordinates.y;
+        // console.log(MOUSE);
+    }
+
+    window.addEventListener("load", resizeCanvas, 10);
+    window.addEventListener("resize", resizeCanvas, 10);
+    window.addEventListener("orientationchange", resizeCanvas, false);
+
+    CANVAS.addEventListener("keydown", keyDown);
+	CANVAS.addEventListener("keyup", keyUp);
+	CANVAS.addEventListener("touchstart", touchStart, false);
+	CANVAS.addEventListener("touchmove", touchMove, false);
+	CANVAS.addEventListener("touchend", touchEnd, false);
+	CANVAS.addEventListener("touchcancel", touchCancel, false);
+	CANVAS.addEventListener("mousemove", mouseMove, false);
+	CANVAS.addEventListener("mousedown", mouseDown, false);
+	CANVAS.addEventListener("mouseup", mouseUp, false);
+</script>
+
+</html>
